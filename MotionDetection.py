@@ -1,8 +1,6 @@
 import numpy as np
 import cv2
-from pyrsistent import b
 import utils
-import time
 
 def run_motion_detction():
     # Connect to the camera.
