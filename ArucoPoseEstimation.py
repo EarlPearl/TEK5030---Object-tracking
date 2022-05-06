@@ -1,3 +1,5 @@
+import random
+
 import cv2
 import numpy as np
 
@@ -25,14 +27,16 @@ class ArucoPoseEstimator:
 
         return frame
 
-    def generate_marker(self, tag_size, id, path):
-        arucoDict = cv2.aruco.Dictionary_get(self.dict)
+    def generate_markers(self, num_markers, tag_size, path):
+        dict_size = len(self.dict.bytesList)
+        print(dict_size)
+        ids = random.sample(range(0, dict_size), num_markers)
+        for id in ids:
+            print("Generating ArUCo tag of type '{}' with ID '{}'".format(self.dict, id))
+            tag = np.zeros((tag_size, tag_size, 1), dtype="uint8")
+            cv2.aruco.drawMarker(self.dict, id, tag_size, tag, 1)
 
-        print("Generating ArUCo tag of type '{}' with ID '{}'".format(self.dict, id))
-        tag = np.zeros((tag_size, tag_size, 1), dtype="uint8")
-        cv2.aruco.drawMarker(arucoDict, id, tag_size, tag, 1)
-
-        # Save the tag generated
-        tag_name = f'{path}/{self.dict}_id_{id}.png'
-        cv2.imwrite(tag_name, tag)
-        cv2.imshow("ArUCo Tag", tag)
+             # Save the tag generated
+            tag_name = f'{path}/{self.dict}_id_{id}.png'
+            cv2.imwrite(tag_name, tag)
+            cv2.imshow("ArUCo Tag", tag)
