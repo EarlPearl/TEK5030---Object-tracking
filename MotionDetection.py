@@ -1,11 +1,11 @@
 import numpy as np
 import cv2
 import utils
-
+import Entities
 
 
 def run_motion_detction():
-    video_source = 0
+    video_source = 2
     cap = cv2.VideoCapture(video_source)
     if not cap.isOpened():
         print(f"Could not open video source {video_source}")
@@ -14,7 +14,7 @@ def run_motion_detction():
         print(f"Successfully opened video source {video_source}")
 
     mog = cv2.createBackgroundSubtractorMOG2()
-    centers_history = np.empty(20, dtype=list)
+    entities = Entities()
     with utils.ViewGui() as gui:
         while True:
             
@@ -35,7 +35,8 @@ def run_motion_detction():
             contours, _ = cv2.findContours(image=dilated, mode=cv2.RETR_EXTERNAL, method=cv2.CHAIN_APPROX_SIMPLE)
             #cv2.drawContours(image=frame, contours=contours, contourIdx=-1, color=(0, 255, 0), thickness=2,
             #                 lineType=cv2.LINE_AA)
-            centers = []
+
+
             for contour in contours:
                 if cv2.contourArea(contour) < 400:
                 #too small!
@@ -44,30 +45,23 @@ def run_motion_detction():
                 (x, y, w, h) = cv2.boundingRect(contour)
                 cv2.rectangle(img=frame, pt1=(x, y), pt2=(x + w, y + h), color=(0, 255, 0), thickness=2)
                 center = (x+w//2, y+h//2)
-                centers.append(center)
-
-            centers_history[0] = centers
+                entities.queue_point(center)
 
             col = cv2.cvtColor(dilated, cv2.COLOR_GRAY2BGR)
             col[:,:,2] = 0
             col[:,:,1] = 0
 
-            for centers in centers_history:
-                if centers is None:
-                    continue
-                for center in centers:
-                    cv2.circle(frame, center, 1, (0,0,255), 2)
-
-            centers_history = np.roll(centers_history, 1)
-
             ttt = cv2.addWeighted(frame, 1, col, 0.40, 0.0)
+
+            entities.update()
+            entities.draw(ttt)
 
             gui.show_frame(ttt)
             key = gui.wait_key(1)
             if key == ord("q"):
                 break            
             if key == ord(" "):
-                centers_history = np.empty(20, dtype=list)
+                pass
 
 
 def main():
@@ -92,5 +86,3 @@ def main():
 
 if __name__== '__main__':
     run_motion_detction()
-
-
