@@ -1,3 +1,4 @@
+import cv2
 class Entity:
 
     def __init__(self, pos, epoch, color=(0,0,255)):
