@@ -11,7 +11,7 @@ class ArucoPoseEstimator:
         self.matrix_coefficients = matrix_coefficients
         self.distortion_coefficients = distortion_coefficients
         self.marker_size = marker_size #marker size in meters
-    def draw_pose(self, frame):
+    def detect_pose_single_markers(self, frame):
         (corners, ids, rejected) = cv2.aruco.detectMarkers(frame, self.dict,
                                                            parameters=self.params)
         if len(corners) > 0:
@@ -26,6 +26,35 @@ class ArucoPoseEstimator:
                 cv2.aruco.drawAxis(frame, self.matrix_coefficients, self.distortion_coefficients, rvec, tvec, 0.01)
 
         return frame
+
+    def detect_planar_board(self, frame):
+        (corners, ids, rejected) = cv2.aruco.detectMarkers(frame, self.dict,
+                                                           parameters=self.params)
+        if len(corners) > 0:
+            for i in range(0, len(ids)):
+                # Estimate pose of each marker and return the values rvec and tvec---(different from those of camera coefficients)
+                rvec, tvec, markerPoints = cv2.aruco.estimatePoseSingleMarkers(corners[i], self.marker_size,
+                                                                               self.matrix_coefficients,
+                                                                               self.distortion_coefficients)
+                # Draw a square around the markers
+                cv2.aruco.drawDetectedMarkers(frame, corners)
+
+                # Draw Axis
+                cv2.aruco.drawAxis(frame, self.matrix_coefficients, self.distortion_coefficients, rvec, tvec, 0.01)
+
+            rvec, tvec, markerPoints = cv2.aruco.estimatePoseSingleMarkers(corners[0], self.marker_size,
+                                                                           self.matrix_coefficients,
+                                                                           self.distortion_coefficients)
+
+            board = cv2.aruco.GridBoard_create(2, 2, 0.03, 0.03, self.dict)
+
+            retval, rvec, tvec = cv2.aruco.estimatePoseBoard(corners, ids, board, self.matrix_coefficients,
+                                                             self.distortion_coefficients, rvec, tvec)
+            if retval > 0:
+                cv2.aruco.drawAxis(frame, self.matrix_coefficients, self.distortion_coefficients, rvec, tvec, 0.01)
+                cv2.aruco.drawPlanarBoard(board, frame.shape[0:2], frame, 0, 2)
+        return frame
+
 
     def generate_markers(self, num_markers, tag_size, path):
         dict_size = len(self.dict.bytesList)
