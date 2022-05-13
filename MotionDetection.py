@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 import utils
-import Entities
+from Entities import Entities
 
 
 def run_motion_detction():
