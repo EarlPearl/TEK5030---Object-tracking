@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 class Entity:
 
     def __init__(self, pos, epoch, color=(0,0,255)):
@@ -6,6 +7,8 @@ class Entity:
         self.last_updated = epoch
         self.queued_point = None
         self.color = color
+        self.id = (str(np.random.choice([chr(i) for i in range(ord("A"), ord("Z"))], 2)).strip("[]").replace("'","") \
+            + "-" + str(np.random.choice([i for i in range(10)], 5)).strip("[]").replace("'","")).replace(" ", "")
 
     def queue(self, point):
         if self.queued_point is None:
@@ -14,6 +17,8 @@ class Entity:
         return False
 
     def update(self, epoch):
+        #TODO, check feature matches.
+        #if none, check difference with last seen area
         if not self.queued_point is None:
             self.pos.append(self.queued_point)
             self.queued_point = None
