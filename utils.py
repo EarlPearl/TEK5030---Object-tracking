@@ -1,4 +1,5 @@
 import cv2
+from time import time
 
 class ViewGui:
     """
@@ -15,6 +16,9 @@ class ViewGui:
         self.segm_win = 'Segmented frame'
         cv2.namedWindow(self.segm_win, cv2.WINDOW_NORMAL)
 
+        #init timer
+        self.last_t = time()
+
     def __enter__(self):
         """Initialises the GUI"""
         return self
@@ -24,8 +28,21 @@ class ViewGui:
         cv2.destroyWindow(self.segm_win)
 
     def show_frame(self, frame_img):
+        curr_t = time()
         """Show an image in the "Segmented frame" window"""
+        text = f"FPS: {1/(curr_t - self.last_t):.0f}"
+        font = cv2.FONT_HERSHEY_PLAIN
+        font_scale = 1.5
+        thickness = 2
+        x, y = (0, 30)
+        
+        (w, h), _ = cv2.getTextSize(text, font, font_scale, thickness)
+        img = cv2.rectangle(frame_img, (x, y - 20), (x + w, y), (125, 125, 125), -1)
+        cv2.putText(frame_img, text, (x, y), font, font_scale, (0, 255, 0),thickness)
         cv2.imshow(self.segm_win, frame_img)
+
+
+        self.last_t = curr_t
 
     def wait_key(self, time_ms):
         """Runs the highgui event loop and receives keypress events"""
