@@ -1,4 +1,9 @@
 class COLORS:
+    """
+    Use example:
+    colors = COLORS()
+    color = colors.next
+    """
     def __init__(self):
         self.index = 0
         self.colors = [(217, 194, 172),
