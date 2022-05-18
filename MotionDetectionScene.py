@@ -111,6 +111,12 @@ class Scene:
         with utils.ViewGui('Scene calibration') as gui:
             self.scene_pose = None
             self.surface = None
+            img_1 = np.zeros([512, 512, 3], dtype=np.uint8)
+            img_1.fill(255)
+            scene_heigt = 0.2
+            scene_width = 0.3
+            plot = utils.Projection2DPlot(img_1, scene_heigt, scene_width)
+
             while True:
 
                 success, frame = cap.read()
@@ -124,12 +130,13 @@ class Scene:
                     rvec, tvec = self.scene_pose
                     cv2.aruco.drawAxis(frame, self.matrix_coefficients, self.distortion_coefficients, rvec, tvec, 0.1)
                     if self.surface is None:
+                        arucoPose = Pose.ArucoPose(rvec, tvec, self.matrix_coefficients)
 
-                        arucoPose = Pose.ArucoPose(rvec, tvec)
-                        point0 = arucoPose.boardToCameraCoordinate(0.0, 0.0, self.matrix_coefficients)
-                        print(point0)
-                        print(np.squeeze(point0.astype(np.int32)))
-                        cv2.drawMarker(frame, np.squeeze(point0.astype(np.int32)), (0, 0, 255), 30, 10, 8)
+                        cv2.drawMarker(frame, (420,150), (0, 255, 0), 30, 10, 8)
+                        pointxy = arucoPose.cameraToboardCoordinate(420, 150)
+                        projected_plot = plot.plot_point(pointxy)
+                        frame = plot.add_to_frame(frame, projected_plot, 0.25)
+                        print(pointxy)
 
                         #T = np.identity(4)
                         #T[0:3, 0:3] = rvec

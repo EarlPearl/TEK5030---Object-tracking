@@ -45,14 +45,13 @@ class ArucoPoseEstimator:
             rvec, tvec, markerPoints = cv2.aruco.estimatePoseSingleMarkers(corners[0], self.marker_size,
                                                                            self.matrix_coefficients,
                                                                            self.distortion_coefficients)
-
-            board = cv2.aruco.GridBoard_create(2, 2, 0.03, 0.03, self.dict)
-
-            retval, rvec, tvec = cv2.aruco.estimatePoseBoard(corners, ids, board, self.matrix_coefficients,
+            if(len(ids) > 3):
+                board = cv2.aruco.GridBoard_create(2, 2, 0.075, 0.05, self.dict)
+            
+                retval, rvec, tvec = cv2.aruco.estimatePoseBoard(corners, ids, board, self.matrix_coefficients,
                                                              self.distortion_coefficients, rvec, tvec)
-            if retval > 0:
-                cv2.aruco.drawAxis(frame, self.matrix_coefficients, self.distortion_coefficients, rvec, tvec, 0.01)
-                cv2.aruco.drawPlanarBoard(board, frame.shape[0:2], frame, 0, 2)
+                cv2.aruco.drawAxis(frame, self.matrix_coefficients, self.distortion_coefficients, rvec, tvec, 0.1)
+                #cv2.aruco.drawPlanarBoard(board, frame.shape[0:2], frame, 0, 5)
         return frame
 
 

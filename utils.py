@@ -1,5 +1,6 @@
 import cv2
 from time import time
+import numpy as np
 
 class ViewGui:
     """
@@ -8,13 +9,13 @@ class ViewGui:
     https://github.com/tek5030/lab-segmentation-py/blob/master/common_lab_utils.py
     """
 
-    def __init__(self):
+    def __init__(self, name):
         """
         Constructs the GUI
         """
         # Create windows.
-        self.segm_win = 'Segmented frame'
-        cv2.namedWindow(self.segm_win, cv2.WINDOW_NORMAL)
+        self.win_name = 'Segmented frame'
+        cv2.namedWindow(self.win_name, cv2.WINDOW_NORMAL)
 
         #init timer
         self.last_t = time()
@@ -25,7 +26,7 @@ class ViewGui:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Destroys the GUI"""
-        cv2.destroyWindow(self.segm_win)
+        cv2.destroyWindow(self.win_name)
 
     def show_frame(self, frame_img):
         curr_t = time()
@@ -39,7 +40,7 @@ class ViewGui:
         (w, h), _ = cv2.getTextSize(text, font, font_scale, thickness)
         img = cv2.rectangle(frame_img, (x, y - 20), (x + w, y), (125, 125, 125), -1)
         cv2.putText(frame_img, text, (x, y), font, font_scale, (0, 255, 0),thickness)
-        cv2.imshow(self.segm_win, frame_img)
+        cv2.imshow(self.win_name, frame_img)
 
 
         self.last_t = curr_t
@@ -57,9 +58,10 @@ class Projection2DPlot:
         self.width = actual_width
         self.height = actual_height
 
-    def plot_point(self, x, y):
-        x_pixel = round(x*(self.image_height/self.height))
-        y_pixel = round(y*(self.image_width/self.width))
+    def plot_point(self, p):
+        p = np.squeeze(p)
+        x_pixel = round(p[0]*(self.image_height/self.height))
+        y_pixel = round(p[1]*(self.image_width/self.width))
         return cv2.circle(self.background, (x_pixel, y_pixel), 20, (0, 0, 255), -1)
 
     @staticmethod
