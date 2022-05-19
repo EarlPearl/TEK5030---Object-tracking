@@ -86,14 +86,14 @@ class Entity:
         
 
 class Entities:
-    def __init__(self, MAX_ENTS=10, threshold=50, decay=30, MAX_POINTS = 1000):
+    def __init__(self, MAX_ENTS=10, threshold=50, decay=10, MAX_POINTS = 1000):
         self.entities = []
-        self.queue = []
-        self.epoch = 0
+        self.queue = [] #list of points to be evalueted
+        self.epoch = 0 #how many times the update functuin has been called
         self.MAX_ENTS = MAX_ENTS
-        self.MAX_POINTS = MAX_POINTS
-        self.threshold = threshold**2
-        self.decay = decay
+        self.MAX_POINTS = MAX_POINTS #the number of positions an entity will store
+        self.threshold = threshold**2 #how close to an existing entity a point must be inorder to be appended
+        self.decay = decay #how long should we remember things that dont move?
         self.colors = COLORS()
 
     def flush(self):
@@ -109,12 +109,7 @@ class Entities:
             d = (x1 - x2)**2 + (y1 - y2)**2
             if d <= self.threshold:
                 dists[d] = ent
-            """if (x1 < x2 + self.threshold and \
-                x1 > x2 - self.threshold and \
-                y1 < y2 + self.threshold and \
-                y1 > y2 - self.threshold):
-                if ent.queue(point, offset):
-                    return"""
+  
         if len(dists.keys()) > 0:
             dists[min(dists.keys())].queue(point, offset)
         else:
@@ -126,7 +121,7 @@ class Entities:
         self.best = [None for i in range(5)]
         for ent in self.entities:
             score = ent.update(self.epoch)
-            if self.epoch - ent.last_updated > self.decay:
+            if self.epoch - (ent.last_updated + ent.age) > self.decay:
                 self.entities.remove(ent)
                 continue
 
@@ -142,7 +137,5 @@ class Entities:
         self.epoch += 1
 
     def draw(self, frame):
-        for ent in self.best:
-            if ent is None:
-                continue
+        for ent in self.entities:
             ent.draw(frame)
