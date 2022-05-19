@@ -9,13 +9,14 @@ class ViewGui:
     https://github.com/tek5030/lab-segmentation-py/blob/master/common_lab_utils.py
     """
 
-    def __init__(self, name='Window'):
+    def __init__(self):
         """
         Constructs the GUI
         """
         # Create windows.
-        self.win_name = name
-        cv2.namedWindow(self.win_name, cv2.WINDOW_NORMAL)
+
+        cv2.namedWindow("main", cv2.WINDOW_NORMAL)
+        cv2.namedWindow("map", cv2.WINDOW_NORMAL)
 
         #init timer
         self.last_t = time()
@@ -26,7 +27,8 @@ class ViewGui:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Destroys the GUI"""
-        cv2.destroyWindow(self.win_name)
+        cv2.destroyWindow("main")
+        cv2.destroyWindow("map")
 
     def show_frame(self, frame_img):
         curr_t = time()
@@ -40,10 +42,13 @@ class ViewGui:
         (w, h), _ = cv2.getTextSize(text, font, font_scale, thickness)
         img = cv2.rectangle(frame_img, (x, y - 20), (x + w, y), (125, 125, 125), -1)
         cv2.putText(frame_img, text, (x, y), font, font_scale, (0, 255, 0),thickness)
-        cv2.imshow(self.win_name, frame_img)
+        cv2.imshow("main", frame_img)
 
 
         self.last_t = curr_t
+
+    def show_map(self, frame_img):
+        cv2.imshow("map", frame_img)
 
     def wait_key(self, time_ms):
         """Runs the highgui event loop and receives keypress events"""
@@ -64,7 +69,7 @@ class Projection2DPlot:
         y_pixel = round(p[1]*(self.image_width/self.width))
         return cv2.circle(self.background, (x_pixel, y_pixel), 20, (0, 0, 255), -1)
 
-    @staticmethod
+    """@staticmethod
     def add_to_frame(frame, plot, relative_size):
         frame_width = frame.shape[1]
         frame_height = frame.shape[0]
@@ -76,19 +81,14 @@ class Projection2DPlot:
         resized = cv2.resize(plot, dim, interpolation=cv2.INTER_AREA)
 
         new_frame = frame.copy()
-        print(frame.shape)
-        print(resized.shape)
         new_frame[:plot_height, (frame_width-plot_width):frame_width] = resized
 
-        return new_frame
+        return new_frame"""
 
 
 def drawGridImage(image, grid_interval,scene_X, scene_Y):
     h = image.shape[0]
     w = image.shape[1]
-
-    print(h)
-    print(w)
 
     pixel_per_meter_x = w/scene_X
     pixel_per_meter_y = h/scene_Y
@@ -96,10 +96,8 @@ def drawGridImage(image, grid_interval,scene_X, scene_Y):
     pixel_interval_x = int(grid_interval * pixel_per_meter_x)
     pixel_interval_y = int(grid_interval * pixel_per_meter_y)
 
-    print(pixel_interval_y)
-    print(pixel_interval_x)
-
     for v in range(0, h, pixel_interval_y):
-        image = cv2.line(image, (v, 0), (v, w), (0, 255, 0), 3)
+        image = cv2.line(image, (v, 0), (v, w), (0, 255, 0), 1)
     for u in range(0, w, pixel_interval_x):
-        image = cv2.line(image, (0, u), (h, u), (0, 255, 0), 3)
+        image = cv2.line(image, (0, u), (h, u), (0, 255, 0), 1)
+

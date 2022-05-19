@@ -102,15 +102,14 @@ class Scene:
                     detect = True
 
 
-    def run_scene_analyze(self):
-        video_source = 0
+    def run_scene_analyze(self, video_source=0):
         cap = cv2.VideoCapture(video_source)
         if not cap.isOpened():
             print(f"Could not open video source {video_source}")
             return
         else:
             print(f"Successfully opened video source {video_source}")
-        with utils.ViewGui('Scene calibration') as gui:
+        with utils.ViewGui() as gui:
             self.scene_pose = None
 
             while True:
@@ -122,6 +121,9 @@ class Scene:
 
                 if self.scene_pose is None:
                     frame, pose = self.detect_markers(frame)
+                    if pose:
+                        rvec, tvec = pose
+                        self.scene_pose = Pose.ArucoPose(rvec, tvec, self.matrix_coefficients)
                 else:
                     cv2.aruco.drawAxis(frame, self.matrix_coefficients, self.distortion_coefficients, self.scene_pose.rvec, self.scene_pose.tvec, 0.1)
                     #if self.surfaceProjection is None:
@@ -158,13 +160,6 @@ class Scene:
                     break
                 if key == ord("r"):
                     self.scene_pose = None
-                if key == ord(" "):
-                    if pose is None:
-                        print("no pose")
-                        continue
-                    else:
-                        rvec, tvec = pose
-                        self.scene_pose = Pose.ArucoPose(rvec, tvec, self.matrix_coefficients)
-                        print("pose set")
+               
 
 

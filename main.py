@@ -12,10 +12,9 @@ import Tracker
 
 
 
-def run_motion_detction():
+def run_motion_detction(video_source=0):
     # Connect to the camera.
     # Change to video file if you want to use that instead.
-    video_source = 0
     cap = cv2.VideoCapture(video_source)
     if not cap.isOpened():
         print(f"Could not open video source {video_source}")
@@ -76,10 +75,9 @@ def run_motion_detction():
             key = gui.wait_key(1)
 
 
-def main():
+def main(video_source=0):
     # Connect to the camera.
     # Change to video file if you want to use that instead.
-    video_source = 0
     cap = cv2.VideoCapture(video_source)
     if not cap.isOpened():
         print(f"Could not open video source {video_source}")
@@ -106,7 +104,7 @@ def Generate_Aruco_markers():
     path = os.path.dirname(os.path.abspath(__file__))
     aruco.generate_markers(4, 200, path)
 
-def Test_Detect_Aruco_markers():
+def Test_Detect_Aruco_markers(video_source=0):
     K = np.array([
         [6.6051081297156020e+02, 0., 3.1810845757653777e+02],
         [0., 6.6051081297156020e+02, 2.3995332228230293e+02],
@@ -116,7 +114,7 @@ def Test_Detect_Aruco_markers():
     aruco = ArucoPoseEstimation.ArucoPoseEstimator(K, dist_coeffs, 0.075)
     # Connect to the camera.
     # Change to video file if you want to use that instead.
-    video_source = 0
+    
     cap = cv2.VideoCapture(video_source)
     if not cap.isOpened():
         print(f"Could not open video source {video_source}")
@@ -152,7 +150,7 @@ def Test_Scene_detection():
 
     #print(scene_detection.scene_pose)
 
-def Test2DPlot():
+def Test2DPlot(video_source=0):
     # Connect to the camera.
     # Change to video file if you want to use that instead.
     img_1 = np.zeros([512, 512, 3], dtype=np.uint8)
@@ -164,7 +162,6 @@ def Test2DPlot():
     y = 4
     plot = utils.Projection2DPlot(img_1, scene_heigt, scene_width)
 
-    video_source = 0
     cap = cv2.VideoCapture(video_source)
     if not cap.isOpened():
         print(f"Could not open video source {video_source}")
@@ -187,16 +184,20 @@ def Test2DPlot():
             frame = gui.show_frame(frame)
             key = gui.wait_key(1)
 
-def run_Object_tracking():
-    scene_detection = MotionDetectionScene.Scene(0.068, 0.0015, 4, 2, 2, 2)
-    scene_detection.run_scene_analyze()
+def run_Object_tracking(video_source=0):
+    scene_detection = MotionDetectionScene.Scene(0.135, 0.004, 1, 2, 1.5, 1.5)
+    scene_detection.run_scene_analyze(video_source)
     background_scene = np.zeros([512, 512, 3], dtype=np.uint8)
     background_scene.fill(255)
-    utils.drawGridImage(background_scene, 0.5, 2, 2)
+
+
+    scenex = scene_detection.sceneWidth
+    sceney = scene_detection.sceneHeight
+
+    utils.drawGridImage(background_scene, 0.1, scenex, sceney)
 
     tracker = Tracker.Tracker(5, 50, 4, 500)
 
-    video_source = 0
     cap = cv2.VideoCapture(video_source)
     if not cap.isOpened():
         print(f"Could not open video source {video_source}")
@@ -208,18 +209,69 @@ def run_Object_tracking():
     success, frame = cap.read()
     if not success:
         return
+
+    h = background_scene.shape[0]
+    w = background_scene.shape[1]
+    pixel_per_meter_x = w/scenex
+    pixel_per_meter_y = h/sceney
+
+    mode = False
+
     with utils.ViewGui() as gui:
         while True:
             success, frame = cap.read()
             if not success:
                 break
+
+            #frame = cv2.undistort(frame, scene_detection.matrix_coefficients, scene_detection.distortion_coefficients)
+            c0x, c0y = scene_detection.scene_pose.boardToCameraCoordinate(0, 0)
+            c1x, c1y = scene_detection.scene_pose.boardToCameraCoordinate(scenex, 0)
+            c2x, c2y = scene_detection.scene_pose.boardToCameraCoordinate(scenex, sceney)
+            c3x, c3y = scene_detection.scene_pose.boardToCameraCoordinate(0, sceney)
+           
+            corner0 = (int(c0x+0.5), int(c0y+0.5))
+            corner1 = (int(c1x+0.5), int(c1y+0.5))
+            corner2 = (int(c2x+0.5), int(c2y+0.5))
+            corner3 = (int(c3x+0.5), int(c3y+0.5))
+            cv2.line(frame, corner0, corner1, (0,255,0), 3)
+            cv2.line(frame, corner1, corner2, (0,0,255), 3)
+            cv2.line(frame, corner2, corner3, (255,0,0), 3)
+            cv2.line(frame, corner3, corner0, (255,255,255), 3)
+
+            cv2.circle(frame, corner0, 10, (0, 255, 0), 10)
+
             tracker.detect(frame)
             tracker.draw(frame)
             gui.show_frame(frame)
+
+            if scene_detection.scene_pose:
+                for ent in tracker.get_enitites():
+                    x,y = scene_detection.scene_pose.cameraToboardCoordinate(ent.x, ent.y)
+                    if x < 0 or y < 0:
+                        continue
+                    x *= pixel_per_meter_x
+                    y *= pixel_per_meter_y
+                    x = int(x)
+                    y = int(y)
+                    cv2.circle(background_scene, (x, h - y), 4, ent.color, 4)
+                    
+
+            gui.show_map(background_scene)
+
             key = gui.wait_key(1)
+
             if key == ord("q"):
                 break
 
+            if key == ord("m"):
+                mode = not mode
+
+            if key == ord(" "):
+                tracker.flush()
+                background_scene.fill(255)
+                utils.drawGridImage(background_scene, 0.1, scenex, sceney)
+
+
 
 if __name__== '__main__':
-    run_Object_tracking()
+    run_Object_tracking(2)

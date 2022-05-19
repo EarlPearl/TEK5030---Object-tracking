@@ -19,11 +19,13 @@ class ArucoPose:
         x_w_h = homogeneous(xw)
         u_h = self.homoegraphy @ x_w_h
         return hnormalized(u_h)
+
     def cameraToboardCoordinate(self, u, v):
         xp = np.array((u, v))[:, np.newaxis]
         x_p_h = homogeneous(xp)
         pos_board_h = np.linalg.inv(self.homoegraphy) @ x_p_h
         return hnormalized(pos_board_h)
+
     def transformImage(self, frame):
         return frame
 
