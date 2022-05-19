@@ -86,7 +86,7 @@ class Entity:
         
 
 class Entities:
-    def __init__(self, MAX_ENTS=10, threshold=50, decay=10, MAX_POINTS = 1000):
+    def __init__(self, MAX_ENTS=10, threshold=50, decay=4, MAX_POINTS = 1000):
         self.entities = []
         self.queue = [] #list of points to be evalueted
         self.epoch = 0 #how many times the update functuin has been called
