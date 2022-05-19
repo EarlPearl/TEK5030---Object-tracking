@@ -9,12 +9,12 @@ class ViewGui:
     https://github.com/tek5030/lab-segmentation-py/blob/master/common_lab_utils.py
     """
 
-    def __init__(self, name):
+    def __init__(self, name='Window'):
         """
         Constructs the GUI
         """
         # Create windows.
-        self.win_name = 'Segmented frame'
+        self.win_name = name
         cv2.namedWindow(self.win_name, cv2.WINDOW_NORMAL)
 
         #init timer
@@ -81,3 +81,25 @@ class Projection2DPlot:
         new_frame[:plot_height, (frame_width-plot_width):frame_width] = resized
 
         return new_frame
+
+
+def drawGridImage(image, grid_interval,scene_X, scene_Y):
+    h = image.shape[0]
+    w = image.shape[1]
+
+    print(h)
+    print(w)
+
+    pixel_per_meter_x = w/scene_X
+    pixel_per_meter_y = h/scene_Y
+
+    pixel_interval_x = int(grid_interval * pixel_per_meter_x)
+    pixel_interval_y = int(grid_interval * pixel_per_meter_y)
+
+    print(pixel_interval_y)
+    print(pixel_interval_x)
+
+    for v in range(0, h, pixel_interval_y):
+        image = cv2.line(image, (v, 0), (v, w), (0, 255, 0), 3)
+    for u in range(0, w, pixel_interval_x):
+        image = cv2.line(image, (0, u), (h, u), (0, 255, 0), 3)

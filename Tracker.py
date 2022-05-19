@@ -5,9 +5,9 @@ from Entities import Entities
 
 
 class Tracker:
-    def __init__(self):
+    def __init__(self, MAX_ENTS, threshold, decay, MAX_POINTS):
         self.mog = cv2.createBackgroundSubtractorMOG2()
-        self.entities = Entities()
+        self.entities = Entities(MAX_ENTS, threshold, decay, MAX_POINTS)
 
     def detect(self, frame):
         fgmask = self.mog.apply(frame, 123, 0.01)

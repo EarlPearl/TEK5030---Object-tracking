@@ -4,7 +4,7 @@ import utils
 import Pose
 
 class Scene:
-    def __init__(self, marker_size, marker_seperation, markersX, markersY):
+    def __init__(self, marker_size, marker_seperation, markersX, markersY, sceneWidth, sceneHeight):
         self.dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_ARUCO_ORIGINAL)
         self.params = cv2.aruco.DetectorParameters_create()
         self.matrix_coefficients =  np.array([
@@ -16,6 +16,8 @@ class Scene:
         self.marker_size = marker_size  # marker size in meters
         self.board = cv2.aruco.GridBoard_create(markersX, markersY, marker_size, marker_seperation, self.dict)
         self.num_markers = markersX * markersY
+        self.sceneHeight = sceneHeight
+        self.sceneWidth = sceneWidth
 
     def detect_markers(self, frame):
         (corners, ids, rejected) = cv2.aruco.detectMarkers(frame, self.dict,
@@ -36,7 +38,7 @@ class Scene:
             rvec, tvec, markerPoints = cv2.aruco.estimatePoseSingleMarkers(corners[0], self.marker_size,
                                                                            self.matrix_coefficients,
                                                                            self.distortion_coefficients)
-            if (len(ids) == self.num_markers):
+            if (len(ids) > 1):
 
                 retval, rvec, tvec = cv2.aruco.estimatePoseBoard(corners, ids, self.board, self.matrix_coefficients,
                                                                  self.distortion_coefficients, rvec, tvec)
@@ -110,12 +112,6 @@ class Scene:
             print(f"Successfully opened video source {video_source}")
         with utils.ViewGui('Scene calibration') as gui:
             self.scene_pose = None
-            self.surface = None
-            img_1 = np.zeros([512, 512, 3], dtype=np.uint8)
-            img_1.fill(255)
-            scene_heigt = 0.2
-            scene_width = 0.3
-            plot = utils.Projection2DPlot(img_1, scene_heigt, scene_width)
 
             while True:
 
@@ -127,27 +123,38 @@ class Scene:
                 if self.scene_pose is None:
                     frame, pose = self.detect_markers(frame)
                 else:
-                    rvec, tvec = self.scene_pose
-                    cv2.aruco.drawAxis(frame, self.matrix_coefficients, self.distortion_coefficients, rvec, tvec, 0.1)
-                    if self.surface is None:
-                        arucoPose = Pose.ArucoPose(rvec, tvec, self.matrix_coefficients)
+                    cv2.aruco.drawAxis(frame, self.matrix_coefficients, self.distortion_coefficients, self.scene_pose.rvec, self.scene_pose.tvec, 0.1)
+                    #if self.surfaceProjection is None:
+                        #arucoPose = Pose.ArucoPose(rvec, tvec, self.matrix_coefficients)
+                        #self.surfaceProjection = arucoPose
 
-                        cv2.drawMarker(frame, (420,150), (0, 255, 0), 30, 10, 8)
-                        pointxy = arucoPose.cameraToboardCoordinate(420, 150)
-                        projected_plot = plot.plot_point(pointxy)
-                        frame = plot.add_to_frame(frame, projected_plot, 0.25)
-                        print(pointxy)
+                        # grab the image dimensions
+                        #h = bool_frame.shape[0]
+                        #w = bool_frame.shape[1]
 
-                        #T = np.identity(4)
-                        #T[0:3, 0:3] = rvec
-                        #T[0:3, 3] = tvec
-                        #new_corner = rvec * corners[0,:] + tvec
-                        #new_corners = corners @ rvec + tvec
-                        #print(new_corner)
+
+                        #new_frame = np.zeros([h, w, 3], dtype=np.uint8)
+                        #new_frame.fill(255)
+                        # loop over the image, pixel by pixel
+                        #for v in range(0, h):
+                            #for u in range(0, w):
+                                # threshold the pixel
+                                #board_pos = arucoPose.cameraToboardCoordinate(u, v)
+                                #if (0 <= board_pos[0, 0] <= self.sceneWidth) and (0 <= board_pos[1, 0] <= self.sceneHeight):
+                                    #new_frame[v, u] = frame[v, u]
+                        #ig = utils.ViewGui('Image')
+                        #ig.show_frame(new_frame)
+
+
+
+
+
 
                 gui.show_frame(frame)
                 key = gui.wait_key(1)
                 if key == ord("q"):
+                    if pose is None:
+                        print("No scene detected")
                     break
                 if key == ord("r"):
                     self.scene_pose = None
@@ -156,6 +163,8 @@ class Scene:
                         print("no pose")
                         continue
                     else:
-                        self.scene_pose = pose
+                        rvec, tvec = pose
+                        self.scene_pose = Pose.ArucoPose(rvec, tvec, self.matrix_coefficients)
                         print("pose set")
+
 

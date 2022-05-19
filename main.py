@@ -3,9 +3,12 @@ import os
 import numpy as np
 import random
 import cv2
+
+import Pose
 import utils
 import ArucoPoseEstimation
 import MotionDetectionScene
+import Tracker
 
 
 
@@ -146,6 +149,7 @@ def Test_Scene_detection():
     scene_detection = MotionDetectionScene.Scene(0.068, 0.0015, 4, 2)
     #scene_detection.run_camera_calibration(8, 20)
     scene_detection.run_scene_analyze()
+
     #print(scene_detection.scene_pose)
 
 def Test2DPlot():
@@ -183,5 +187,39 @@ def Test2DPlot():
             frame = gui.show_frame(frame)
             key = gui.wait_key(1)
 
+def run_Object_tracking():
+    scene_detection = MotionDetectionScene.Scene(0.068, 0.0015, 4, 2, 2, 2)
+    scene_detection.run_scene_analyze()
+    background_scene = np.zeros([512, 512, 3], dtype=np.uint8)
+    background_scene.fill(255)
+    utils.drawGridImage(background_scene, 0.5, 2, 2)
+
+    tracker = Tracker.Tracker(5, 50, 4, 500)
+
+    video_source = 0
+    cap = cv2.VideoCapture(video_source)
+    if not cap.isOpened():
+        print(f"Could not open video source {video_source}")
+        return
+    else:
+        print(f"Successfully opened video source {video_source}")
+
+    # Read the first frame.
+    success, frame = cap.read()
+    if not success:
+        return
+    with utils.ViewGui() as gui:
+        while True:
+            success, frame = cap.read()
+            if not success:
+                break
+            tracker.detect(frame)
+            tracker.draw(frame)
+            gui.show_frame(frame)
+            key = gui.wait_key(1)
+            if key == ord("q"):
+                break
+
+
 if __name__== '__main__':
-    Test_Scene_detection()
+    run_Object_tracking()
