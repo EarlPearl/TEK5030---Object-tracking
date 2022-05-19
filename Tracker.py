@@ -24,9 +24,9 @@ class Tracker:
                 #too small!
                 continue
 
-        (x, y, w, h) = cv2.boundingRect(contour)
-        center = (x+w//2, y+h//2)
-        self.entities.queue_point(center, (w//2, h//2))
+            (x, y, w, h) = cv2.boundingRect(contour)
+            center = (x+w//2, y+h//2)
+            self.entities.queue_point(center, (w//2, h//2))
 
         self.entities.update()
 
