@@ -1,9 +1,18 @@
 class COLORS:
     """
+    The xqcd color survey in BGR format
+    
     Use example:
     colors = COLORS()
     color = colors.next
     """
+    @property
+    def next(self):
+        color = self.colors[self.index]
+        self.index += 1
+        if self.index >= len(self.colors): self.index = 0
+        return color
+
     def __init__(self):
         self.index = 0
         self.colors = [(217, 194, 172),
@@ -956,9 +965,3 @@ class COLORS:
         (26, 176, 21),
         (156, 30, 126)]
 
-    @property
-    def next(self):
-        color = self.colors[self.index]
-        self.index += 1
-        if self.index >= len(self.colors): self.index = 0
-        return color

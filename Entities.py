@@ -3,6 +3,36 @@ import numpy as np
 from COLORS import COLORS
 
 class Entity:
+    """
+    An entity (object) is manly just a list of positions.
+        Properties:
+            pos: returns a list of all positions stored.
+            predicted_pos: returns the latest position.
+            x: returns the latest x coordinate (note this is really the u coordinate, not the global X).
+            y: returns the latest y coordinate (note this is really the v coordinate, not the global Y).
+
+        Functions:
+            queue:
+                Args:
+                    point: tuple or list of coordinates (x, y) of the center point of a contour.
+
+                    offset: the width and hight of the bounding box of the contour,
+                            used to draw a box around the object.
+                Returns:
+                    bool: True if point was successfully queued, False if another point was already queued
+
+            update:
+                Args:
+                    epoch: int how long (how many frames) has the program ran for.
+                Returns:
+                    score: a numerical score used rank the objects.
+            
+            draw:
+                Args:
+                    frame: the frame the object should draw itself to.
+                Returns:
+                    None
+    """
     def __init__(self, pos, offset, epoch, MAX_POINTS, color=(0,0,255)):
         self.age = 0 #number of times updated
         self.MAX_POINTS = MAX_POINTS
@@ -22,14 +52,6 @@ class Entity:
         return False
 
     def update(self, epoch):
-        #TODO, check feature matches.
-        #if none, check difference with last seen area
-
-        #TODO add linreg of last N positions to predict next
-
-
-        #TODO use predicted next point to look for features/match
-
         if not self.queued_point is None:
             self.pos, self.offset = self.queued_point
             self.queued_point = None

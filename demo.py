@@ -1,7 +1,6 @@
 import os
 
 import numpy as np
-import random
 import cv2
 
 import Pose
@@ -217,22 +216,24 @@ def run_Object_tracking(video_source=0):
 
     mode = 1
 
+    #frame = cv2.undistort(frame, scene_detection.matrix_coefficients, scene_detection.distortion_coefficients)
+    c0x, c0y = scene_detection.scene_pose.boardToCameraCoordinate(0, 0)
+    c1x, c1y = scene_detection.scene_pose.boardToCameraCoordinate(scenex, 0)
+    c2x, c2y = scene_detection.scene_pose.boardToCameraCoordinate(scenex, sceney)
+    c3x, c3y = scene_detection.scene_pose.boardToCameraCoordinate(0, sceney)
+    
+    corner0 = (int(c0x+0.5), int(c0y+0.5))
+    corner1 = (int(c1x+0.5), int(c1y+0.5))
+    corner2 = (int(c2x+0.5), int(c2y+0.5))
+    corner3 = (int(c3x+0.5), int(c3y+0.5))
+
     with utils.ViewGui() as gui:
         while True:
             success, frame = cap.read()
             if not success:
                 break
 
-            #frame = cv2.undistort(frame, scene_detection.matrix_coefficients, scene_detection.distortion_coefficients)
-            c0x, c0y = scene_detection.scene_pose.boardToCameraCoordinate(0, 0)
-            c1x, c1y = scene_detection.scene_pose.boardToCameraCoordinate(scenex, 0)
-            c2x, c2y = scene_detection.scene_pose.boardToCameraCoordinate(scenex, sceney)
-            c3x, c3y = scene_detection.scene_pose.boardToCameraCoordinate(0, sceney)
-           
-            corner0 = (int(c0x+0.5), int(c0y+0.5))
-            corner1 = (int(c1x+0.5), int(c1y+0.5))
-            corner2 = (int(c2x+0.5), int(c2y+0.5))
-            corner3 = (int(c3x+0.5), int(c3y+0.5))
+
             cv2.line(frame, corner0, corner1, (0,255,0), 3)
             cv2.line(frame, corner1, corner2, (0,0,255), 3)
             cv2.line(frame, corner2, corner3, (255,0,0), 3)
@@ -268,7 +269,6 @@ def run_Object_tracking(video_source=0):
 
             if key == ord("q"):
                 break
-
             if key == ord("1"):
                 mode = 1
             if key == ord("2"):
