@@ -1,11 +1,6 @@
-import os
-
 import numpy as np
 import cv2
-
-import Pose
 import utils
-import ArucoPoseEstimation
 import MotionDetectionScene
 import Tracker
 
@@ -91,49 +86,6 @@ def main(video_source=0):
 
     # Stop video source.
     # cap.release()
-
-def Generate_Aruco_markers():
-    K = np.array([
-        [6.6051081297156020e+02, 0., 3.1810845757653777e+02],
-        [0., 6.6051081297156020e+02, 2.3995332228230293e+02],
-        [0., 0., 1.]
-    ])
-    dist_coeffs = np.array([0., 2.2202255011309072e-01, 0., 0., -5.0348071005413975e-01])
-    aruco = ArucoPoseEstimation.ArucoPoseEstimator(K, dist_coeffs, 0.1)
-    path = os.path.dirname(os.path.abspath(__file__))
-    aruco.generate_markers(4, 200, path)
-
-def Test_Detect_Aruco_markers(video_source=0):
-    K = np.array([
-        [6.6051081297156020e+02, 0., 3.1810845757653777e+02],
-        [0., 6.6051081297156020e+02, 2.3995332228230293e+02],
-        [0., 0., 1.]
-    ])
-    dist_coeffs = np.array([0., 2.2202255011309072e-01, 0., 0., -5.0348071005413975e-01])
-    aruco = ArucoPoseEstimation.ArucoPoseEstimator(K, dist_coeffs, 0.075)
-    # Connect to the camera.
-    # Change to video file if you want to use that instead.
-    
-    cap = cv2.VideoCapture(video_source)
-    if not cap.isOpened():
-        print(f"Could not open video source {video_source}")
-        return
-    else:
-        print(f"Successfully opened video source {video_source}")
-
-    # Read the first frame.
-    success, frame = cap.read()
-    if not success:
-        return
-    with utils.ViewGui() as gui:
-        while True:
-            success, frame = cap.read()
-            if not success:
-                break
-            frame = aruco.detect_planar_board(frame)
-            frame = gui.show_frame(frame)
-            key = gui.wait_key(1)
-
 
 def Test_Scene_detection():
     K = np.array([
