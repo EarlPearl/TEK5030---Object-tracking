@@ -5,6 +5,18 @@ import Pose
 
 class Scene:
     def __init__(self, marker_size, marker_seperation, markersX, markersY, sceneWidth, sceneHeight):
+        
+        """
+        Args:
+            marker_size: size of the marker in meters
+            marker_seperation: space between markers in meters
+            markersX: number of markers along the X-axis
+            markersY: number of markers along the Y-axis
+            sceneWidth: Width of scene in meters
+            sceneHeight: Height of scene in meters
+
+        """
+        
         self.dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_ARUCO_ORIGINAL)
         self.params = cv2.aruco.DetectorParameters_create()
         self.matrix_coefficients =  np.array([
