@@ -8,32 +8,25 @@ class Entity:
         Properties:
             pos: returns a list of all positions stored.
             predicted_pos: returns the latest position.
-            x: returns the latest x coordinate (note this is really the u coordinate, not the global X).
-            y: returns the latest y coordinate (note this is really the v coordinate, not the global Y).
+            x: returns the latest x coordinate.
+            y: returns the latest y coordinate.
+        (note this is really the u,v coordinate, not the global X,Y)
 
         Functions:
-            queue:
-                Args:
-                    point: tuple or list of coordinates (x, y) of the center point of a contour.
-
-                    offset: the width and hight of the bounding box of the contour,
-                            used to draw a box around the object.
-                Returns:
-                    bool: True if point was successfully queued, False if another point was already queued
-
-            update:
-                Args:
-                    epoch: int how long (how many frames) has the program ran for.
-                Returns:
-                    score: a numerical score used rank the objects.
-            
-            draw:
-                Args:
-                    frame: the frame the object should draw itself to.
-                Returns:
-                    None
+            queue
+            update
+            draw
     """
     def __init__(self, pos, offset, epoch, MAX_POINTS, color=(0,0,255)):
+        """
+        Args:
+            pos: initial position
+            offset: width and hight to the bounding box of the object
+            epoch: what frame the object was created on
+            MAX_POINTS: how many coordinates the object should remember
+            color: color of the object
+
+        """
         self.age = 0 #number of times updated
         self.MAX_POINTS = MAX_POINTS
         self.offset = offset
@@ -42,27 +35,48 @@ class Entity:
         self.last_updated = epoch
         self.queued_point = None
         self.color = color
-        self.id = (str(np.random.choice([chr(i) for i in range(ord("A"), ord("Z"))], 2)).strip("[]").replace("'","") \
-            + "-" + str(np.random.choice([i for i in range(10)], 5)).strip("[]").replace("'","")).replace(" ", "")
+        #id is just two random letters and five random numbers so the tracking looks cooler
+        self.id = (str(np.random.choice([chr(i) for i in range(ord("A"), \
+            ord("Z"))], 2)).strip("[]").replace("'","") \
+            + "-" + \
+            str(np.random.choice([i for i in range(10)], 5)).strip("[]").replace("'","")).replace(" ", "")
 
     def queue(self, point, offset):
+        """
+        Args:
+            point: tuple or list of coordinates (x, y) of the center point of a contour.
+
+            offset: the width and hight of the bounding box of the contour,
+                    used to draw a box around the object.
+        Returns:
+            bool: True if point was successfully queued, False if another point was already queued
+        """
         if self.queued_point is None:
             self.queued_point = (point, offset)
             return True
         return False
 
     def update(self, epoch):
+        """
+        Updates the positon and age of the entity, if a point is queued.
+        Args:
+            epoch: int how long (how many frames) has the program ran for.
+        Returns:
+            score: a numerical score used rank the objects.
+        """
         if not self.queued_point is None:
             self.pos, self.offset = self.queued_point
             self.queued_point = None
             self.last_updated = epoch
             self.age += 1
-
-        score = self.age 
-        return score
     
     def draw(self, frame):
-
+        """
+        Args:
+            frame: the frame the object should draw itself to.
+        Returns:
+            None
+        """
         x, y = self.predicted_pos
         w, h = self.offset
         #draw bounding box
@@ -109,21 +123,23 @@ class Entity:
 
 class Entities:
     def __init__(self, MAX_ENTS=10, threshold=50, decay=4, MAX_POINTS = 1000):
-        self.entities = []
+        self.entities = [] #list of tracked entites/objects
         self.queue = [] #list of points to be evalueted
         self.epoch = 0 #how many times the update functuin has been called
-        self.MAX_ENTS = MAX_ENTS
+        self.MAX_ENTS = MAX_ENTS #number of entites to keep track of
         self.MAX_POINTS = MAX_POINTS #the number of positions an entity will store
-        self.threshold = threshold**2 #how close to an existing entity a point must be inorder to be appended
+        self.threshold = threshold**2 #distance threshold between points and objects
         self.decay = decay #how long should we remember things that dont move?
         self.colors = COLORS()
 
     def flush(self):
+        """clears tracked entites and queued points"""
         self.entities = []
         self.queue = []
 
     def queue_point(self, point, offset):
-        #TODO maybe make it so that points are optimised not just given to the first entity within bounds?
+        """Finds the closes object to a point and assigns the point to it
+        if no object is close enough, create it creates a new one"""
         x1, y1 = point
         dists = {}
         for ent in self.entities:
@@ -139,18 +155,16 @@ class Entities:
         return
 
     def update(self):
-        self.best_score = np.zeros(5)
-        self.best = [None for i in range(5)]
+        """
+        updates all entities
+        delete entites not updated in awhile
+        create new entites of unassigned points
+        """
         for ent in self.entities:
-            score = ent.update(self.epoch)
+            ent.update(self.epoch)
             if self.epoch - (ent.last_updated + ent.age) > self.decay:
                 self.entities.remove(ent)
                 continue
-
-            worst = np.argmin(self.best_score)
-            if score > self.best_score[worst]:
-                self.best_score[worst] = score
-                self.best[worst] = ent
 
         while len(self.queue) > 0 and len(self.entities) < self.MAX_ENTS:
             point, offset = self.queue.pop()
@@ -159,5 +173,6 @@ class Entities:
         self.epoch += 1
 
     def draw(self, frame):
+        """draws all entites"""
         for ent in self.entities:
             ent.draw(frame)

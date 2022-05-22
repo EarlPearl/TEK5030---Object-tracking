@@ -5,12 +5,30 @@ from Entities import Entities
 
 
 class Tracker:
+    """
+    Detects motion and manages entites
+    """
     def __init__(self, MAX_ENTS, threshold, decay, MAX_POINTS):
+        """
+        Args
+            MAX_ENTS: number of entites to trak
+            threshold: distance before a point is concidered a new object
+            decay: how long to remember objects no longer tracked
+            MAX_POINTS: how many coordinates can each object remember
+        """
         self.mog = cv2.createBackgroundSubtractorMOG2()
         self._entities = Entities(MAX_ENTS, threshold, decay, MAX_POINTS)
-        self.hackyhackvariable = 0
+        self.hackyhackvariable = 0 #counts frames, used to stop the MOG adapting
 
     def detect(self, frame):
+        """
+        detects motion with MOG2, finds contours.
+        Queues the points and updates entites.
+
+        Args:
+            frame, an image
+
+        """
         if self.hackyhackvariable < 10:
             fgmask = self.mog.apply(frame, 123, 0.01)
             self.hackyhackvariable += 1
@@ -36,10 +54,20 @@ class Tracker:
         self._entities.update()
 
     def draw(self, frame):
+        """
+        draws all entites
+        """
         self._entities.draw(frame)
 
     def get_enitites(self):
+        """
+        returns
+            a list of all tracked entites
+        """
         return self._entities.entities
 
     def flush(self):
+        """
+        cleares all tracked entites and queued points
+        """
         self._entities.flush()

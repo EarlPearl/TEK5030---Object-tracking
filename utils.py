@@ -5,7 +5,7 @@ import numpy as np
 class ViewGui:
     """
     A simple GUI for visualising results.
-    It is based on the code form the segmentation lab:
+    It is based on the code form the course:
     https://github.com/tek5030/lab-segmentation-py/blob/master/common_lab_utils.py
     """
 
@@ -55,6 +55,9 @@ class ViewGui:
         return cv2.waitKey(time_ms)
 
 def drawGridImage(image, grid_interval,scene_X, scene_Y):
+    """
+    Draws a square, evenly spaced, grid on the input image
+    """
     h = image.shape[0]
     w = image.shape[1]
 
