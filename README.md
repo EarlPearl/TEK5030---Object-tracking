@@ -5,10 +5,7 @@
 Initilize the aruco/scene detection class
 
 ```python
-scene_detection = MotionDetectionScene.Scene(   size, \
-                                                seperation, \
-                                                X, Y, \
-                                                Width, Height)
+scene_detection = MotionDetectionScene.Scene(size,seperation, X, Y, Width, Height)
 ```
 
 Find the aruco markers and create a sceen
