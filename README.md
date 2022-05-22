@@ -2,21 +2,37 @@
 
 ## Basic use
 
+Initilize the aruco/scene detection class
+
+```python
+scene_detection = MotionDetectionScene.Scene(   size, \
+                                                seperation, \
+                                                X, Y, \
+                                                Width, Height)
+```
+
 Find the aruco markers and create a sceen
-> scene_detection = MotionDetectionScene.Scene(size, seperation, X, Y, Width, Height)
-> scene_detection.run_scene_analyze(video_source)
+
+```python
+scene_detection.run_scene_analyze(video_source)
+
+```
 
 Create a tracker instance
->    tracker = Tracker.Tracker(MAX_ENTS, threshold, decay, MAX_POINTS)
 
+```python
+tracker = Tracker.Tracker(MAX_ENTS, threshold, decay, MAX_POINTS)
+```
 give it a frame or image to analyze
 
-> tracker.detect(frame)
-
+```python
+tracker.detect(frame)
+```
 draw the entites to a frame or image
 
-> tracker.draw(frame)
-
+```python
+tracker.draw(frame)
+```
 
 ## Files:
 * **demo.py**
