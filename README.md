@@ -1,4 +1,4 @@
-# Project A.R.G.U.S
+# Project A.R.G.U.S.
 
 ## Basic use
 
