@@ -26,9 +26,6 @@ class ArucoPose:
         pos_board_h = np.linalg.inv(self.homoegraphy) @ x_p_h
         return hnormalized(pos_board_h)
 
-    def transformImage(self, frame):
-        return frame
-
 def homogeneous(x):
     """Transforms Cartesian column vectors to homogeneous column vectors"""
     return np.r_[x, [np.ones(x.shape[1])]]

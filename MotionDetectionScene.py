@@ -126,31 +126,6 @@ class Scene:
                         self.scene_pose = Pose.ArucoPose(rvec, tvec, self.matrix_coefficients)
                 else:
                     cv2.aruco.drawAxis(frame, self.matrix_coefficients, self.distortion_coefficients, self.scene_pose.rvec, self.scene_pose.tvec, 0.1)
-                    #if self.surfaceProjection is None:
-                        #arucoPose = Pose.ArucoPose(rvec, tvec, self.matrix_coefficients)
-                        #self.surfaceProjection = arucoPose
-
-                        # grab the image dimensions
-                        #h = bool_frame.shape[0]
-                        #w = bool_frame.shape[1]
-
-
-                        #new_frame = np.zeros([h, w, 3], dtype=np.uint8)
-                        #new_frame.fill(255)
-                        # loop over the image, pixel by pixel
-                        #for v in range(0, h):
-                            #for u in range(0, w):
-                                # threshold the pixel
-                                #board_pos = arucoPose.cameraToboardCoordinate(u, v)
-                                #if (0 <= board_pos[0, 0] <= self.sceneWidth) and (0 <= board_pos[1, 0] <= self.sceneHeight):
-                                    #new_frame[v, u] = frame[v, u]
-                        #ig = utils.ViewGui('Image')
-                        #ig.show_frame(new_frame)
-
-
-
-
-
 
                 gui.show_frame(frame)
                 key = gui.wait_key(1)
