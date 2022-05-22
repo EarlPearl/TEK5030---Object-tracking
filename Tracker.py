@@ -22,9 +22,9 @@ class Tracker:
         kernel = np.ones((9, 9))
         self.dilated = cv2.dilate(thresh, kernel, 1)
 
-        contours, _ = cv2.findContours(image=self.dilated, mode=cv2.RETR_EXTERNAL, method=cv2.CHAIN_APPROX_SIMPLE)
+        self.contours, _ = cv2.findContours(image=self.dilated, mode=cv2.RETR_EXTERNAL, method=cv2.CHAIN_APPROX_SIMPLE)
 
-        for contour in contours:
+        for contour in self.contours:
             if cv2.contourArea(contour) < 400:
                 #too small!
                 continue
